@@ -5,6 +5,7 @@ import okio.BufferedSink;
 import org.junit.After;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -15,7 +16,7 @@ public class OkHttpTest {
 
     @After
     public void after() throws InterruptedException {
-        Thread.sleep(2000L);
+        Thread.sleep(3000L);
     }
 
     /**
@@ -83,6 +84,55 @@ public class OkHttpTest {
         OkHttpClient client = new OkHttpClient();
         Call call = client.newCall(request);
         call.enqueue(new InterCallback());
+
+    }
+
+    /**
+     * post方式提交文件
+     */
+    @Test
+    public void test05(){
+        MediaType mediaType = MediaType.parse("text/x-markdown; charset=utf-8");
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://api.github.com/markdown/raw")
+                .post(RequestBody.create(mediaType, new File("E:\\sim.txt")))
+                .build();
+        Call call = okHttpClient.newCall(request);
+        call.enqueue(new InterCallback());
+    }
+
+    /**
+     * post方式提交表单
+     */
+    @Test
+    public void test06(){
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("text/plain");
+        FormBody formBody = new FormBody.Builder().add("name", "nzj").build();
+        Request request = new Request.Builder().url("https://en.wikipedia.org/w/index.php").post(formBody).build();
+        Call call = client.newCall(request);
+        call.enqueue(new InterCallback());
+    }
+
+    @Test
+    public void test07(){
+        OkHttpClient client = new OkHttpClient();
+        MultipartBody multipartBody = new MultipartBody.Builder("AaB03x")
+                .setType(MultipartBody.FORM)
+                .addPart(
+                        Headers.of("Content-Disposition", "form-data; name=\"title\""),
+                        RequestBody.create(null, "Square Logo"))
+                .addPart(
+                        Headers.of("Content-Disposition", "form-data; name=\"image\""),
+                        RequestBody.create(MediaType.parse("image/jpg"), new File("E:\\壁纸\\1.jpg")))
+                .build();
+        Request request = new Request.Builder()
+                .addHeader("Authorization", "Client-ID...")
+                .url("https://api.imgur.com/3/image")
+                .post(multipartBody)
+                .build();
+        client.newCall(request).enqueue(new InterCallback());
 
     }
 
